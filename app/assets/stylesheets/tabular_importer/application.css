@@ -32,6 +32,8 @@
 .ti-errors, .ti-warning, .ti-flash { padding: 14px 16px; border-radius: 8px; }
 .ti-errors, .ti-flash--alert { color: var(--ti-danger); border: 1px solid #fda29b; background: #fff1f0; }
 .ti-warning { margin-top: 20px; color: #7a2e0e; border: 1px solid #fec84b; background: #fffaeb; }
+.ti-confirmation { display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; color: var(--ti-text); font-weight: 650; cursor: pointer; }
+.ti-confirmation input { width: 18px; height: 18px; margin-top: 2px; }
 .ti-flash { margin-bottom: 16px; }
 .ti-flash--notice { color: #05603a; border: 1px solid #6ce9a6; background: #ecfdf3; }
 .ti-summary { margin: 0; }

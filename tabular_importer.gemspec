@@ -3,7 +3,7 @@ require_relative "lib/tabular_importer/version"
 Gem::Specification.new do |spec|
   spec.name = "tabular_importer"
   spec.version = TabularImporter::VERSION
-  spec.authors = ["PCD"]
+  spec.authors = ["Karel Nel"]
   spec.summary = "A configurable, staged CSV and XLSX import engine for Rails"
   spec.description = "Upload, preview, map, analyse, process, and monitor tabular imports through a mountable Rails engine."
   spec.license = "MIT"

@@ -1,11 +1,12 @@
 module TabularImporter
   class Definition
     attr_reader :key, :title, :description, :columns, :analyzer, :processor,
-      :transactional, :metadata_validator, :mapping_validator, :presenter
+      :transactional, :metadata_validator, :mapping_validator, :presenter,
+      :allow_partial_imports
 
     def initialize(key:, columns:, processor:, analyzer: nil, title: nil, description: nil,
                    transactional: false, metadata_validator: nil, mapping_validator: nil,
-                   presenter: nil)
+                   presenter: nil, allow_partial_imports: false)
       @key = key.to_s
       @title = title.presence || key.to_s.humanize
       @description = description
@@ -16,6 +17,7 @@ module TabularImporter
       @metadata_validator = metadata_validator
       @mapping_validator = mapping_validator
       @presenter = presenter
+      @allow_partial_imports = allow_partial_imports
 
       validate!
     end
@@ -30,6 +32,10 @@ module TabularImporter
 
     def transactional?
       !!transactional
+    end
+
+    def allow_partial_imports?
+      !!allow_partial_imports
     end
 
     def analyze_with

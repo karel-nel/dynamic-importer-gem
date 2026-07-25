@@ -13,6 +13,8 @@ class InstallGeneratorTest < ActiveSupport::TestCase
     assert migration
     assert_includes File.read(migration), "ActiveRecord::Migration[8.0]"
     assert_includes File.read(migration), "t.string :requester_id"
+    assert_includes File.read(migration), "t.string :idempotency_key, null: false"
+    assert_includes File.read(migration), "t.string :processor_execution_id"
   ensure
     FileUtils.remove_entry(destination) if destination && File.exist?(destination)
   end

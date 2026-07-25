@@ -53,9 +53,8 @@ module TabularImporter
     end
 
     def start_processing
-      raise InvalidState, "Only ready imports can be processed" unless @import.status == "ready"
-
-      @import.transition_to!(:processing, result_summary: {}, completed_at: nil)
+      confirmed = ActiveModel::Type::Boolean.new.cast(params[:confirm_partial_import])
+      @import.begin_processing!(partial_import_confirmed: confirmed)
       ProcessJob.perform_later(@import)
       redirect_to import_path(@import)
     rescue InvalidState => error
@@ -66,7 +65,8 @@ module TabularImporter
       raise InvalidState, "Only failed imports can be retried" unless @import.failed?
 
       if @import.failure_stage == "processing"
-        @import.transition_to!(:processing, error_class: nil, error_message: nil)
+        @import.transition_to!(:processing, error_class: nil, error_message: nil,
+          processor_execution_id: nil, processor_execution_started_at: nil, processor_heartbeat_at: nil)
         ProcessJob.perform_later(@import)
       elsif @import.failure_stage == "preview"
         PreparePreview.call(@import)
