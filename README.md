@@ -89,9 +89,18 @@ TabularImporter.configure do |config|
     mapping_validator: Imports::EventResultMappingValidator,
     presenter: Imports::EventResultsPresenter,
     allow_partial_imports: false,
+    back_url: ->(controller) { controller.main_app.member_dashboard_path },
     transactional: false
 end
 ```
+
+`back_url` adds a **Back** button to the imports index (for example,
+`/member-imports/`). It may be a fixed URL string or a callable receiving the
+engine controller, which allows host route helpers to be accessed through
+`controller.main_app`. If multiple definitions are registered, the button is
+shown only when their resolved, non-empty back URLs are identical. The imports
+index does not show a single-definition **New** button; host applications can
+link directly to `new_import_path(import_type: ...)`.
 
 Columns accept:
 

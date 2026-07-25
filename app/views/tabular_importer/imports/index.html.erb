@@ -3,9 +3,8 @@
     <h1>Data imports</h1>
     <p class="ti-muted">Upload, match, validate, and process tabular data.</p>
   </div>
-  <% if TabularImporter.configuration.definitions.one? %>
-    <% definition = TabularImporter.configuration.definitions.values.first %>
-    <%= link_to "New #{definition.title.downcase}", new_import_path(import_type: definition.key), class: "ti-button" %>
+  <% if @back_url.present? %>
+    <%= link_to "Back", @back_url, class: "ti-button ti-button--secondary" %>
   <% end %>
 </div>
 

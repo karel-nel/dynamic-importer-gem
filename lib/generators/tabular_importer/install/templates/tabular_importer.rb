@@ -24,5 +24,6 @@ TabularImporter.configure do |config|
   #   ],
   #   analyzer: Imports::ExampleAnalyzer,
   #   processor: Imports::ExampleProcessor,
-  #   allow_partial_imports: false
+  #   allow_partial_imports: false,
+  #   back_url: ->(controller) { controller.main_app.root_path }
 end
