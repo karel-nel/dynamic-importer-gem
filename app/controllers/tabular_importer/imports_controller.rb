@@ -7,6 +7,7 @@ module TabularImporter
         .call(Import.all, current_import_actor)
         .recent_first
         .limit(100)
+      @back_url = configured_back_url
     end
 
     def new
@@ -102,6 +103,13 @@ module TabularImporter
 
     def mapping_params
       params.fetch(:column_mapping, {}).permit!.to_h
+    end
+
+    def configured_back_url
+      urls = TabularImporter.configuration.definitions.values.filter_map do |definition|
+        definition.back_url_for(self).presence
+      end
+      urls.uniq.one? ? urls.first : nil
     end
 
     def locate_importable(sgid)

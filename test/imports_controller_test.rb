@@ -13,10 +13,25 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     get "/imports"
     assert_response :success
     assert_includes response.body, "Data imports"
+    refute_includes response.body, "New people"
 
     get "/imports/new", params: { import_type: "people" }
     assert_response :success
     assert_includes response.body, "Upload and preview"
+  end
+
+  test "renders the importer back URL on the index" do
+    TabularImporter.register :people,
+      title: "People",
+      columns: [{ key: :external_id, required: true, aliases: ["CSA ID"] }],
+      processor: TestProcessor,
+      back_url: ->(_controller) { "/member-dashboard" }
+
+    get "/imports"
+
+    assert_response :success
+    assert_select "a.ti-button[href='/member-dashboard']", text: "Back"
+    refute_includes response.body, "New people"
   end
 
   test "renders mapping and authorized progress" do

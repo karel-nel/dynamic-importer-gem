@@ -2,11 +2,11 @@ module TabularImporter
   class Definition
     attr_reader :key, :title, :description, :columns, :analyzer, :processor,
       :transactional, :metadata_validator, :mapping_validator, :presenter,
-      :allow_partial_imports
+      :allow_partial_imports, :back_url
 
     def initialize(key:, columns:, processor:, analyzer: nil, title: nil, description: nil,
                    transactional: false, metadata_validator: nil, mapping_validator: nil,
-                   presenter: nil, allow_partial_imports: false)
+                   presenter: nil, allow_partial_imports: false, back_url: nil)
       @key = key.to_s
       @title = title.presence || key.to_s.humanize
       @description = description
@@ -18,6 +18,7 @@ module TabularImporter
       @mapping_validator = mapping_validator
       @presenter = presenter
       @allow_partial_imports = allow_partial_imports
+      @back_url = back_url
 
       validate!
     end
@@ -38,6 +39,10 @@ module TabularImporter
       !!allow_partial_imports
     end
 
+    def back_url_for(controller)
+      back_url.respond_to?(:call) ? back_url.call(controller) : back_url
+    end
+
     def analyze_with
       analyzer || TabularImporter::DefaultAnalyzer
     end
@@ -51,6 +56,9 @@ module TabularImporter
       raise ArgumentError, "analyzer must respond to .call" if analyzer && !analyzer.respond_to?(:call)
       raise ArgumentError, "mapping_validator must respond to .call" if mapping_validator && !mapping_validator.respond_to?(:call)
       raise ArgumentError, "presenter must respond to .call" if presenter && !presenter.respond_to?(:call)
+      unless back_url.nil? || back_url.is_a?(String) || back_url.respond_to?(:call)
+        raise ArgumentError, "back_url must be a String or respond to .call"
+      end
     end
   end
 end
