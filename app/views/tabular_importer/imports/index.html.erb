@@ -1,0 +1,45 @@
+<div class="ti-heading">
+  <div>
+    <h1>Data imports</h1>
+    <p class="ti-muted">Upload, match, validate, and process tabular data.</p>
+  </div>
+  <% if TabularImporter.configuration.definitions.one? %>
+    <% definition = TabularImporter.configuration.definitions.values.first %>
+    <%= link_to "New #{definition.title.downcase}", new_import_path(import_type: definition.key), class: "ti-button" %>
+  <% end %>
+</div>
+
+<% if TabularImporter.configuration.definitions.many? %>
+  <section class="ti-card">
+    <h2>Start an import</h2>
+    <div class="ti-actions ti-actions--start">
+      <% TabularImporter.configuration.definitions.each_value do |definition| %>
+        <%= link_to definition.title, new_import_path(import_type: definition.key), class: "ti-button" %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<section class="ti-card">
+  <h2>Recent imports</h2>
+  <% if @imports.any? %>
+    <div class="ti-table-wrap">
+      <table class="ti-table">
+        <thead><tr><th>Type</th><th>File</th><th>Status</th><th>Created</th><th></th></tr></thead>
+        <tbody>
+          <% @imports.each do |import| %>
+            <tr>
+              <td><%= import.definition.title %></td>
+              <td><%= import.source_file.filename %></td>
+              <td><span class="ti-status ti-status--<%= import.status %>"><%= import_status_label(import.status) %></span></td>
+              <td><%= l(import.created_at, format: :short) %></td>
+              <td><%= link_to "Open", import_path(import) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="ti-muted">No imports yet.</p>
+  <% end %>
+</section>

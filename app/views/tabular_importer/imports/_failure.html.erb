@@ -1,0 +1,11 @@
+<section class="ti-card">
+  <h2>Import failed</h2>
+  <div class="ti-errors">
+    <strong><%= import.error_class.presence || "Import error" %></strong>
+    <p><%= import.error_message %></p>
+  </div>
+  <div class="ti-actions">
+    <%= button_to "Retry", retry_import_import_path(import), method: :post, class: "ti-button" %>
+    <%= link_to "Back to imports", imports_path, class: "ti-button ti-button--secondary" %>
+  </div>
+</section>

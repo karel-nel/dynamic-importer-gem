@@ -1,0 +1,30 @@
+<div class="ti-heading">
+  <div>
+    <%= link_to "← Imports", imports_path, class: "ti-back" %>
+    <h1><%= @definition.title %></h1>
+    <% if @definition.description.present? %><p class="ti-muted"><%= @definition.description %></p><% end %>
+  </div>
+</div>
+
+<section class="ti-card">
+  <% if @import.errors.any? %>
+    <div class="ti-errors">
+      <strong>The import could not be started:</strong>
+      <ul><% @import.errors.full_messages.each do |message| %><li><%= message %></li><% end %></ul>
+    </div>
+  <% end %>
+
+  <%= form_with model: @import, url: imports_path, local: true, html: { multipart: true, class: "ti-form" } do |form| %>
+    <%= form.hidden_field :import_type, value: @definition.key %>
+    <%= form.hidden_field :importable_sgid, value: @importable_sgid %>
+    <label class="ti-upload">
+      <span class="ti-upload__title">Choose a CSV or XLSX file</span>
+      <span class="ti-muted">Maximum size: <%= number_to_human_size(TabularImporter.configuration.max_file_size) %></span>
+      <%= form.file_field :source_file, accept: ".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", required: true %>
+    </label>
+    <div class="ti-actions">
+      <%= link_to "Cancel", imports_path, class: "ti-button ti-button--secondary" %>
+      <%= form.submit "Upload and preview", class: "ti-button" %>
+    </div>
+  <% end %>
+</section>

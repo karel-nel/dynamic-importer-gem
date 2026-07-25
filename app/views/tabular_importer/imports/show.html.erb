@@ -1,0 +1,23 @@
+<div class="ti-heading">
+  <div>
+    <%= link_to "← Imports", imports_path, class: "ti-back" %>
+    <h1><%= @definition.title %></h1>
+    <p class="ti-muted"><%= @import.source_file.filename %> · <%= number_to_human_size(@import.source_file.byte_size) %></p>
+  </div>
+  <span class="ti-status ti-status--<%= @import.status %>"><%= import_status_label(@import.status) %></span>
+</div>
+
+<% case @import.status %>
+<% when "mapping_required" %>
+  <%= render "mapping", import: @import, definition: @definition, mapping_errors: @mapping_errors %>
+<% when "analyzing", "processing" %>
+  <%= render "progress", import: @import %>
+<% when "ready" %>
+  <%= render "analysis", import: @import %>
+<% when "completed" %>
+  <%= render "result", import: @import, presented_result: @presented_result %>
+<% when "failed" %>
+  <%= render "failure", import: @import %>
+<% else %>
+  <section class="ti-card"><p>Preparing the import…</p></section>
+<% end %>

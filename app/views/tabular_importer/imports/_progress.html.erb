@@ -1,0 +1,8 @@
+<section class="ti-card" data-ti-progress data-progress-url="<%= progress_import_path(import, format: :json) %>">
+  <h2><%= import.status == "analyzing" ? "Analysing data" : "Processing import" %></h2>
+  <div class="ti-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="ti-progress__bar" data-ti-progress-bar></div>
+  </div>
+  <p data-ti-progress-message><%= import.progress_message.presence || "Waiting for the background job…" %></p>
+  <p class="ti-muted" data-ti-progress-count></p>
+</section>

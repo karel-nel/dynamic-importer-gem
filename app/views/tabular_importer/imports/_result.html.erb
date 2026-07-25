@@ -1,0 +1,18 @@
+<section class="ti-card">
+  <h2>Import complete</h2>
+  <%= render_summary_value(import.result_summary) %>
+  <% if presented_result.present? %>
+    <h3>Processed records</h3>
+    <div class="ti-table-wrap">
+      <table class="ti-table">
+        <thead><tr><% Array(presented_result["columns"] || presented_result[:columns]).each do |column| %><th><%= column.to_s.humanize %></th><% end %></tr></thead>
+        <tbody>
+          <% Array(presented_result["rows"] || presented_result[:rows]).each do |row| %>
+            <tr><% Array(presented_result["columns"] || presented_result[:columns]).each do |column| %><td><%= row[column.to_s] || row[column.to_sym] %></td><% end %></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+  <div class="ti-actions"><%= link_to "Back to imports", imports_path, class: "ti-button" %></div>
+</section>

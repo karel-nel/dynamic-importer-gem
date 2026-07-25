@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data import</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tabular_importer/application", media: "all" %>
+    <%= javascript_include_tag "tabular_importer/application", defer: true %>
+  </head>
+  <body class="ti-body">
+    <main class="ti-shell">
+      <% if flash[:notice].present? %><div class="ti-flash ti-flash--notice"><%= flash[:notice] %></div><% end %>
+      <% if flash[:alert].present? %><div class="ti-flash ti-flash--alert"><%= flash[:alert] %></div><% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>

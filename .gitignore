@@ -1,0 +1,6 @@
+/.bundle
+/pkg
+/coverage
+/tmp
+/test/storage
+Gemfile.lock

@@ -1,0 +1,9 @@
+<section class="ti-card">
+  <h2>Analysis complete</h2>
+  <%= render_summary_value(import.analysis) %>
+  <div class="ti-warning"><strong>Confirm before continuing.</strong> Processing can create or update application data.</div>
+  <div class="ti-actions">
+    <%= button_to "Process import", process_import_path(import), method: :post, class: "ti-button",
+      form: { data: { turbo_confirm: "Process this import?" } } %>
+  </div>
+</section>

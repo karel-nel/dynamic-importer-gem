@@ -1,0 +1,35 @@
+<section class="ti-card">
+  <h2>Match columns</h2>
+  <p class="ti-muted">Choose what each source column represents. Required fields are marked with an asterisk.</p>
+
+  <% if mapping_errors.present? %>
+    <div class="ti-errors"><ul><% mapping_errors.each do |message| %><li><%= message %></li><% end %></ul></div>
+  <% end %>
+
+  <%= form_with url: update_mapping_import_path(import), method: :patch, local: true,
+      html: { data: { ti_mapping: true, required_columns: definition.required_columns.map(&:key).to_json } } do %>
+    <div class="ti-table-wrap">
+      <table class="ti-table ti-preview">
+        <thead>
+          <tr class="ti-mapping-row">
+            <% import.source_headers.each_with_index do |_header, index| %>
+              <th>
+                <%= select_tag "column_mapping[#{index}]",
+                  options_for_select([["Unused", ""]] + definition.columns.map { |column| ["#{column.label}#{column.required? ? ' *' : ''}", column.key] }, import.column_mapping[index.to_s]),
+                  class: "ti-select", data: { ti_mapping_select: true }, aria: { label: "Map column #{index + 1}" } %>
+              </th>
+            <% end %>
+          </tr>
+          <tr><% import.source_headers.each do |header| %><th><%= header.presence || "Unnamed" %></th><% end %></tr>
+        </thead>
+        <tbody>
+          <% import.preview_rows.each do |row| %>
+            <tr><% import.source_headers.each_index do |index| %><td><%= row[index] %></td><% end %></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <p class="ti-muted">Showing the first <%= import.preview_rows.size %> data rows.</p>
+    <div class="ti-actions"><%= submit_tag "Analyse import", class: "ti-button", data: { ti_mapping_submit: true } %></div>
+  <% end %>
+</section>
