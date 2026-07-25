@@ -6,7 +6,11 @@
     <div class="ti-errors">
       <strong>Processing blocked.</strong>
       The analysis found <%= pluralize(import.invalid_rows_count, "invalid row") %>.
-      Correct the source file and start a new import.
+      Correct the source file and upload it as a new import.
+    </div>
+    <div class="ti-actions">
+      <%= link_to "Upload New File", replacement_import_path(import),
+        class: "ti-button ti-button--secondary" %>
     </div>
   <% else %>
     <%= form_with url: process_import_path(import), method: :post, local: true,
@@ -32,7 +36,20 @@
         <div class="ti-warning"><strong>Confirm before continuing.</strong> Processing can create or update application data.</div>
       <% end %>
       <% unless import.has_invalid_rows? && !import.partial_import_rows_identified? %>
-        <div class="ti-actions"><%= submit_tag "Process import", class: "ti-button" %></div>
+        <div class="ti-actions">
+          <% if import.has_invalid_rows? %>
+            <%= link_to "Upload New File", replacement_import_path(import),
+              class: "ti-button ti-button--secondary" %>
+            <%= submit_tag "Continue Anyway", class: "ti-button" %>
+          <% else %>
+            <%= submit_tag "Process import", class: "ti-button" %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="ti-actions">
+          <%= link_to "Upload New File", replacement_import_path(import),
+            class: "ti-button ti-button--secondary" %>
+        </div>
       <% end %>
     <% end %>
   <% end %>

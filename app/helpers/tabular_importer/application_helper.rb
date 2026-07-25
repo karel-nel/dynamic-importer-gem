@@ -4,6 +4,17 @@ module TabularImporter
       status.to_s.tr("_", " ").humanize
     end
 
+    def replacement_import_path(import)
+      parameters = { import_type: import.import_type }
+      if import.importable.present?
+        parameters[:importable_sgid] = import.importable.to_sgid(
+          expires_in: 2.hours,
+          for: "tabular_importer"
+        )
+      end
+      new_import_path(parameters)
+    end
+
     def render_summary_value(value)
       case value
       when Hash
