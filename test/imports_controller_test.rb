@@ -48,6 +48,8 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     get "/imports/#{strict.id}"
     assert_response :success
     assert_includes response.body, "Processing blocked"
+    assert_includes response.body, "Upload New File"
+    refute_includes response.body, "Continue Anyway"
     refute_includes response.body, "confirm_partial_import"
 
     register_invalid_type(:partial_rows, allow_partial_imports: true)
@@ -56,6 +58,8 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "confirm_partial_import"
     assert_includes response.body, "required=\"required\""
+    assert_includes response.body, "Continue Anyway"
+    assert_includes response.body, "Upload New File"
 
     post "/imports/#{partial.id}/process"
     assert_redirected_to "/imports/#{partial.id}"
@@ -65,6 +69,22 @@ class ImportsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to "/imports/#{partial.id}"
     assert_equal "processing", partial.reload.status
     assert partial.partial_import_confirmed?
+  end
+
+  test "upload new file starts a fresh upload while preserving import context" do
+    register_invalid_type(:partial_rows, allow_partial_imports: true)
+    import = ready_invalid_import("partial_rows")
+    import.update!(importable: @actor)
+
+    get "/imports/#{import.id}"
+    replacement_link = css_select("a").find { |node| node.text == "Upload New File" }
+    assert replacement_link
+
+    get replacement_link["href"]
+    assert_response :success
+    assert_includes response.body, "Upload and preview"
+    assert_select "input[name='import[import_type]'][value='partial_rows']"
+    assert_select "input[name='import[importable_sgid]'][value]:not([value=''])"
   end
 
   private

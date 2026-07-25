@@ -115,9 +115,12 @@ Set `allow_partial_imports: true` on an import definition only when partial
 processing is acceptable. A custom analyser must then return both
 `invalid_rows` and the complete `invalid_source_rows` array. The engine removes
 those exact physical rows from the row stream passed to the processor. The
-confirmation screen shows a required checkbox before processing can start. The
-same rules are enforced by the model, so omitting the checkbox, omitting source
-row identities, or bypassing the browser cannot start a partial import.
+confirmation screen shows a required checkbox with **Continue Anyway**, plus an
+**Upload New File** action that starts a fresh upload for the same import type
+and linked domain record. Strict definitions only show the replacement-upload
+action. The same processing rules are enforced by the model, so omitting the
+checkbox, omitting source row identities, or bypassing the browser cannot start
+a partial import.
 
 ```ruby
 class Imports::EventResultsAnalyzer
