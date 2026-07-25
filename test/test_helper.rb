@@ -16,6 +16,7 @@ class TabularImporterTestApplication < Rails::Application
   config.secret_key_base = "tabular-importer-test-secret-key-base"
   config.logger = Logger.new(nil)
   config.hosts << "www.example.com"
+  config.action_controller.allow_forgery_protection = false
   config.active_job.queue_adapter = :test
   config.active_storage.service = :test
   config.active_storage.service_configurations = {
@@ -35,6 +36,7 @@ ActiveRecord::Schema.define do
   create_table :tabular_importer_imports do |t|
     t.string :import_type, null: false
     t.string :status, null: false, default: "uploaded"
+    t.string :idempotency_key, null: false
     t.string :requester_type
     t.string :requester_id
     t.string :importable_type
@@ -53,9 +55,23 @@ ActiveRecord::Schema.define do
     t.text :error_message
     t.datetime :started_at
     t.datetime :completed_at
+    t.boolean :partial_import_confirmed, null: false, default: false
+    t.string :processor_execution_id
+    t.integer :processor_attempts, null: false, default: 0
+    t.datetime :processor_execution_started_at
+    t.datetime :processor_heartbeat_at
     t.integer :lock_version, null: false, default: 0
     t.timestamps
   end
+  add_index :tabular_importer_imports, :idempotency_key, unique: true
+
+  create_table :tabular_importer_idempotency_records do |t|
+    t.string :import_id, null: false
+    t.string :key, null: false, limit: 500
+    t.timestamps
+  end
+  add_index :tabular_importer_idempotency_records, [:import_id, :key], unique: true,
+    name: "index_tabular_importer_idempotency_records_unique"
 
   create_table :active_storage_blobs do |t|
     t.string :key, null: false
@@ -99,9 +115,11 @@ class TestProcessor
   def self.call(import:, rows:, progress:)
     total = rows.count
     created = 0
-    rows.each.with_index(1) do |(row, _source_row), current|
-      ProcessedRow.create!(external_id: row[:external_id], name: row[:name])
-      created += 1
+    rows.each.with_index(1) do |(row, source_row), current|
+      executed = import.idempotently("source-row:#{source_row}") do
+        ProcessedRow.create!(external_id: row[:external_id], name: row[:name])
+      end
+      created += 1 if executed
       progress.call(current:, total:, message: "Processing #{current}")
     end
     { created: }
@@ -127,6 +145,7 @@ class ActiveSupport::TestCase
       processor: TestProcessor
 
     ProcessedRow.delete_all
+    TabularImporter::IdempotencyRecord.delete_all
     TabularImporter::Import.delete_all
     ActiveStorage::Attachment.delete_all
     ActiveStorage::Blob.delete_all
@@ -134,10 +153,12 @@ class ActiveSupport::TestCase
     clear_performed_jobs
   end
 
-  def build_import(filename: "results.csv")
-    import = TabularImporter::Import.new(import_type: "people")
+  def build_import(filename: "results.csv", import_type: "people", content_type: nil)
+    import = TabularImporter::Import.new(import_type:)
     path = File.join(__dir__, "fixtures", "files", filename)
-    import.source_file.attach(io: File.open(path), filename:, content_type: "text/csv")
+    content_type ||= filename.end_with?(".xlsx") ?
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "text/csv"
+    import.source_file.attach(io: File.open(path), filename:, content_type:)
     import.save!
     import.reload
   end

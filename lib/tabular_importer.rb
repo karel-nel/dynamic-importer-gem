@@ -4,6 +4,8 @@ require "active_job/railtie"
 require "roo"
 require "csv"
 require "set"
+require "securerandom"
+require "zip"
 
 require "tabular_importer/version"
 require "tabular_importer/errors"

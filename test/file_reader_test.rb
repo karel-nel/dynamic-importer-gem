@@ -10,6 +10,7 @@ class FileReaderTest < ActiveSupport::TestCase
     assert_equal 2, reader.preview(limit: 5).size
     assert_equal 2, reader.row_count
     assert_equal 2, reader.to_a.size
+    assert_equal [2, 4], reader.each_with_source_row.map { |_row, source_row| source_row }
   end
 
   test "reads XLSX files" do

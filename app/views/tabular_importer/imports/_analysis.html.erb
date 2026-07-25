@@ -1,9 +1,39 @@
 <section class="ti-card">
   <h2>Analysis complete</h2>
   <%= render_summary_value(import.analysis) %>
-  <div class="ti-warning"><strong>Confirm before continuing.</strong> Processing can create or update application data.</div>
-  <div class="ti-actions">
-    <%= button_to "Process import", process_import_path(import), method: :post, class: "ti-button",
-      form: { data: { turbo_confirm: "Process this import?" } } %>
-  </div>
+
+  <% if import.has_invalid_rows? && !import.definition.allow_partial_imports? %>
+    <div class="ti-errors">
+      <strong>Processing blocked.</strong>
+      The analysis found <%= pluralize(import.invalid_rows_count, "invalid row") %>.
+      Correct the source file and start a new import.
+    </div>
+  <% else %>
+    <%= form_with url: process_import_path(import), method: :post, local: true,
+      html: { data: { turbo_confirm: "Process this import?" } } do %>
+      <% if import.has_invalid_rows? %>
+        <div class="ti-warning">
+          <strong>Partial import requested.</strong>
+          The engine will exclude the invalid source rows reported by analysis; it found
+          <%= pluralize(import.invalid_rows_count, "invalid row") %>.
+          <% if import.partial_import_rows_identified? %>
+            <label class="ti-confirmation">
+              <%= check_box_tag :confirm_partial_import, "1", false, required: true %>
+              I understand and want to continue with a partial import.
+            </label>
+          <% else %>
+            <div class="ti-errors">
+              Processing is blocked because the analyser did not return a complete
+              <code>invalid_source_rows</code> list.
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="ti-warning"><strong>Confirm before continuing.</strong> Processing can create or update application data.</div>
+      <% end %>
+      <% unless import.has_invalid_rows? && !import.partial_import_rows_identified? %>
+        <div class="ti-actions"><%= submit_tag "Process import", class: "ti-button" %></div>
+      <% end %>
+    <% end %>
+  <% end %>
 </section>

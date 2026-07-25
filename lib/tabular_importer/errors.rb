@@ -10,6 +10,8 @@ module TabularImporter
     end
   end
   class UnsupportedFile < Error; end
+  class ResourceLimitExceeded < UnsupportedFile; end
+  class ProcessingLeaseUnavailable < Error; end
   class InvalidState < Error; end
   class Unauthorized < Error; end
 end
