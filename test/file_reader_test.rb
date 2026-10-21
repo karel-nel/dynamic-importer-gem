@@ -13,6 +13,25 @@ class FileReaderTest < ActiveSupport::TestCase
     assert_equal [2, 4], reader.each_with_source_row.map { |_row, source_row| source_row }
   end
 
+  test "stops inspection after the configured number of non-empty preview rows" do
+    import = build_import
+    reader = TabularImporter::FileReader.new(import.source_file)
+    TabularImporter.configuration.preview_rows = 2
+
+    reader.define_singleton_method(:each_physical_row) do |&block|
+      block.call(["ID", "Name"], 1)
+      block.call([nil, ""], 2)
+      block.call(["1", "Ada"], 3)
+      block.call(["2", "Grace"], 4)
+      raise "inspection read beyond the preview rows"
+    end
+
+    inspection = reader.inspect_file
+
+    assert_equal ["ID", "Name"], inspection.headers
+    assert_equal [["1", "Ada"], ["2", "Grace"]], inspection.preview_rows
+  end
+
   test "reads XLSX files" do
     package = Axlsx::Package.new
     package.workbook.add_worksheet(name: "Results") do |sheet|

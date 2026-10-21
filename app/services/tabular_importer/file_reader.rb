@@ -2,7 +2,7 @@ module TabularImporter
   class FileReader
     include Enumerable
 
-    Inspection = Struct.new(:headers, :preview_rows, :row_count, keyword_init: true)
+    Inspection = Struct.new(:headers, :preview_rows, keyword_init: true)
 
     attr_reader :attachment
 
@@ -15,26 +15,27 @@ module TabularImporter
       @inspection ||= begin
         headers = nil
         preview_rows = []
-        row_count = 0
+        preview_limit = [configuration.preview_rows.to_i, 0].max
 
         each_physical_row do |row, source_row_number|
           validate_row_limits!(row, source_row_number)
           if headers.nil?
             headers = row
+            break if preview_limit.zero?
             next
           end
           next if row.all?(&:blank?)
 
-          row_count += 1
-          enforce_maximum!(:max_rows, row_count, "data rows")
-          preview_rows << row if preview_rows.size < configuration.preview_rows
+          preview_rows << row
+          enforce_maximum!(:max_rows, preview_rows.size, "data rows")
+          break if preview_rows.size >= preview_limit
         end
 
         if headers.nil? || headers.all?(&:blank?)
           raise UnsupportedFile, "The uploaded file has no header row"
         end
 
-        Inspection.new(headers:, preview_rows:, row_count:)
+        Inspection.new(headers:, preview_rows:)
       end
     end
 
@@ -71,7 +72,11 @@ module TabularImporter
     end
 
     def row_count
-      inspect_file.row_count
+      return @row_count if defined?(@row_count)
+
+      @row_count = 0
+      each_with_source_row { @row_count += 1 }
+      @row_count
     end
 
     private
